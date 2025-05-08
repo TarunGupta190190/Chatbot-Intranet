@@ -2,10 +2,17 @@ import pandas as pd
 import requests
 import streamlit as st
 from db import DB as sqldb
+from text_to_sql import text_to_sql
+
 
 sqldb = sqldb()
+text_to_sql =  text_to_sql()
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "mistral"
+
+
+
+
 
 def query_llm(prompt):
     response = requests.post(
@@ -82,20 +89,42 @@ if uploaded_file:
     latest_data = sqldb.get_latest_records()
     st.dataframe(latest_data)
 
-    question = st.text_input("Ask a question about the data:")
+    user_question = st.text_input("Ask a question about the data:")
 
-    if question:
+    if user_question:
         # Get all data for analysis
-        all_data = sqldb.get_table_data(conn)
+        all_data = sqldb.get_table_data("tenant_data")
         column_list = ', '.join(all_data.columns)
-        prompt = f"""
-You are a Python assistant. Given a Pandas DataFrame with these columns: {column_list},
-and this user question: "{question}", generate Python code using pandas that answers it.
+        # prompt = f"""
+        #             You are a Python assistant. Given a Pandas DataFrame with these columns: {column_list},
+        #             and this user question: "{user_question}", generate Python code using pandas that answers it.
 
-Do not load CSV or display plots. Just return the Python code for analysis.
-"""
-        result = query_llm(prompt)
-        st.code(result, language='python')
+        #             Do not load CSV or display plots. Just return the Python code for analysis.
+        #             """
+        # result = query_llm(prompt)
+        # st.code(result, language='python')
+
+        
+
+        schema = [f"{row[1]} ({row[2]})" for row in db_schema]
+        schema_str = ", ".join(schema)
+        prompt = f"""
+        You are an assistant that converts user questions into SQL queries for a SQLite database.
+        The main table is called tenant_data. Here is the schema:
+        {schema_str}
+        Return only the SQL query, nothing else.
+
+        User question: "{user_question}"
+        """
+        st.info(f"Generating SQL for \"{user_question}\"")
+        sql_query = text_to_sql.query_llm_for_sql(prompt)
+        
+        st.code(sql_query, language='sq')
+        try:
+            result = pd.read_sql_query(sql_query, conn)
+            st.dataframe(result)
+        except Exception as e:
+            st.error(f"Error executing SQL: {e}")
 
         st.markdown("⚠️ For safety, you must copy and run the code manually to verify it.")
 
