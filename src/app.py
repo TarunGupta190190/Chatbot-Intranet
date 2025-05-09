@@ -4,11 +4,12 @@ import streamlit as st
 from db import DB as sqldb
 from text_to_sql import text_to_sql
 
+import re
 
 sqldb = sqldb()
 text_to_sql =  text_to_sql()
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "mistral"
+MODEL_NAME = "deepseek-coder:16b-v2"
 
 
 
@@ -26,6 +27,16 @@ st.title("📊 Tenants Information System")
 uploaded_file = st.file_uploader("Upload your daily CSV")
 
 if uploaded_file:
+    
+    filename = uploaded_file.name
+    match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+    if match:
+        current_date = match.group(0)
+        st.info(f"Using date from file name: {current_date} as the current date.")
+    else:
+        st.warning("No date found in the file name. Please use a filename like YYYY-MM-DD_tenants.csv.")
+        current_date = None
+
     # Read CSV into DataFrame
     df = pd.read_csv(uploaded_file)
     st.subheader("CSV Preview")
@@ -51,7 +62,7 @@ if uploaded_file:
         else:
             # For each day column (assuming columns '1', '2', '3' exist for days)
             if row_tenant_value in ['1', '2', '3'] and tenant_id is not None:
-                data_date = sqldb.map_day_to_date(int(row_tenant_value))
+                data_date = sqldb.map_day_to_date(int(row_tenant_value), current_date)
                 data_dict = row.drop('Tenant').to_dict()
                 if not sqldb.tenant_data_exists(tenant_id, data_date):
                     sqldb.insert_tenant_data(tenant_id, data_date, data_dict)
@@ -112,12 +123,14 @@ if uploaded_file:
         You are an assistant that converts user questions into SQL queries for a SQLite database.
         The main table is called tenant_data. Here is the schema:
         {schema_str}
-        Return only the SQL query, nothing else.
+        Return only the SQL query as plain text. Do not include any code block formatting, triple backticks, or language tags. Output only the SQL statement.
+
 
         User question: "{user_question}"
         """
         st.info(f"Generating SQL for \"{user_question}\"")
         sql_query = text_to_sql.query_llm_for_sql(prompt)
+        sql_query = sql_query.replace("```sql", "").replace("```", "")
         
         st.code(sql_query, language='sq')
         try:
