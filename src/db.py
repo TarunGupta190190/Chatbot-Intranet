@@ -142,7 +142,7 @@ class DB:
         '''
         self.cursor.execute(tenant_name_query)
         tenant_name = self.cursor.fetchone()
-        columns = ', '.join(['tenant_id', 'data_date','Tenant'] +  list(data_dict.keys()))
+        columns = ', '.join(['tenant_id', 'Date','Tenant'] +  list(data_dict.keys()))
         placeholders = ', '.join(['?'] * (3 + len(data_dict)))
         values = [tenant_id, data_date, tenant_name[0]] + list(data_dict.values())
         self.cursor.execute(f"INSERT INTO tenant_data ({columns}) VALUES ({placeholders})", values)
@@ -158,9 +158,15 @@ class DB:
             return pd.read_sql_query(query, self.conn, params=(tenant_name,))
         return pd.read_sql_query(query, self.conn)
 
-    def map_day_to_date(self,day_num):
+    def map_day_to_date(self, day_num, date=None):
         # 3 = today, 2 = yesterday, 1 = 2 days ago
-        today = datetime.today().date()
+        if date is not None:
+            if isinstance(date, str):
+                today = datetime.strptime(date, "%Y-%m-%d").date()
+            else:
+                today = date
+        else:
+            today = datetime.today().date()
         if day_num == 3:
             return today
         elif day_num == 2:
