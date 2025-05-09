@@ -14,24 +14,24 @@ class text_to_sql:
 
     def query_llm_for_sql(self, prompt):
         
-        # # Call your LLM API (Ollama)
-        # response = requests.post(
-        #     "http://localhost:11434/api/generate",
-        #     json={"model": "mistral", "prompt": prompt, "stream": False}
-        # )
-        # return response.json()["response"].strip()
+        # Call your LLM API (Ollama)
+        response = requests.post(
+            "http://10.13.5.8:11434/api/generate",
+            json={"model": "deepseek-coder-v2", "prompt": prompt, "stream": False}
+        )
+        return response.json()["response"].strip()
 
-        API_URL = "https://api-inference.huggingface.co/models/defog/sqlcoder-7b-2"
-        headers = {"Authorization": f"Bearer {st.secrets['HF_API_TOKEN']}"}
-        st.code(headers, language='sq')
-        payload = {
-            "inputs": f"Convert this to SQL:\n{prompt}",
-            "parameters": {"max_new_tokens": 100},
-        }
-        response = requests.post(API_URL, headers=headers, json=payload)
-        st.code(response, language='sq')
-        result = response.json()
-        return result[0]["generated_text"] if isinstance(result, list) else str(result)
+        # API_URL = "https://api-inference.huggingface.co/models/defog/sqlcoder-7b-2"
+        # headers = {"Authorization": f"Bearer {st.secrets['HF_API_TOKEN']}"}
+        # st.code(headers, language='sq')
+        # payload = {
+        #     "inputs": f"Convert this to SQL:\n{prompt}",
+        #     "parameters": {"max_new_tokens": 100},
+        # }
+        # response = requests.post(API_URL, headers=headers, json=payload)
+        # st.code(response, language='sq')
+        # result = response.json()
+        # return result[0]["generated_text"] if isinstance(result, list) else str(result)
 
 # Get schema for prompt
 # cursor = conn.cursor()
