@@ -17,6 +17,25 @@ This is a chatbot application designed for internal employee use, powered by Oll
         >> Mistral model is small enough to run on most Windows machines with 8–16 GB RAM, and it handles structured data queries and basic natural language tasks quite well.
    - Open your browser and run this http://localhost:11434
         >> We should see "Ollama is running"
+        
+### Set these vars into /etc/systemd/system/ollama.service
+# [Unit]
+# Description=Ollama Service
+# After=network-online.target
+#
+# [Service]
+# Environment="OLLAMA_HOST=0.0.0.0"
+# ExecStart=/usr/local/bin/ollama serve
+# User=ollama
+# Group=ollama
+# Restart=always
+# RestartSec=3
+#
+# Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+#
+# [Install]
+# WantedBy=default.target
+
 
 2. Install Python dependencies:
    ```bash
