@@ -12,17 +12,6 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "deepseek-coder:16b-v2"
 
 
-
-
-
-def query_llm(prompt):
-    response = requests.post(
-        OLLAMA_URL,
-        json={"model": MODEL_NAME, "prompt": prompt, "stream": False}
-    )
-    return response.json()["response"]
-
-
 st.title("📊 Tenants Information System")
 uploaded_file = st.file_uploader("Upload your daily CSV")
 
