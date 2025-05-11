@@ -5,7 +5,7 @@ import os
 import re
 
 ### Inhouse inbuild modules
-from db import DB as sqldb
+from db_mysql import DB as sqldb
 from text_to_sql import LLMHandler
 
 
