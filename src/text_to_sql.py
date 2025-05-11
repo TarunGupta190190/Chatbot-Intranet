@@ -1,20 +1,22 @@
-import sqlite3
 import pandas as pd
 import streamlit as st
 from db import DB
 import requests
 
-sqldb = DB()
-conn = sqlite3.connect('Tenants_info.db')
-
-
-class text_to_sql:
+class LLMHandler:
     def __init__(self) -> None:
         pass
 
     def query_llm_for_sql(self, prompt):
-        
+
         # Call your LLM API (Ollama)
+        response = requests.post(
+            "http://10.13.5.8:11434/api/generate",
+            json={"model": "deepseek-coder-v2", "prompt": prompt, "stream": False}
+        )
+        return response.json()["response"].strip()
+
+    def query_llm(self, prompt):
         response = requests.post(
             "http://10.13.5.8:11434/api/generate",
             json={"model": "deepseek-coder-v2", "prompt": prompt, "stream": False}
