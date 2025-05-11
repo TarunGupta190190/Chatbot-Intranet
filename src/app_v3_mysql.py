@@ -14,6 +14,9 @@ text_to_sql = LLMHandler()
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "deepseek-coder:16b-v2"
 
+tenant_data_dir = "tenant_data_files"
+tenant_data_dir_path = os.path.abspath(os.path.join(os.path.dirname(__file__),tenant_data_dir))
+os.makedirs(tenant_data_dir_path, exist_ok=True)
 
 st.title("ðŸ“Š Tenants Information System")
 uploaded_file = st.file_uploader("Upload your daily CSV")
